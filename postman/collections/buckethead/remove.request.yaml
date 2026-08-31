@@ -1,8 +1,0 @@
-$kind: http-request
-name: remove
-url: "{{base_url}}/removeuser"
-method: DELETE
-body:
-  type: json
-  content: ""
-order: 4172507509844226
