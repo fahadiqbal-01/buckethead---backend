@@ -1,0 +1,5 @@
+$kind: http-request
+name: health
+url: "{{base_url}}/health"
+method: GET
+order: 4396495429629200

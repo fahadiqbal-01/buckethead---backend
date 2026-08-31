@@ -1,0 +1,14 @@
+$kind: http-request
+name: validation
+url: "{{base_url}}/login"
+method: GET
+body:
+  type: json
+  content: "{\r
+
+    \    \"email\":\"arman@gmail.com\",\r
+
+    \    \"password_hash\":\"a8f9c2d1e04b78aa\"\r
+
+    }"
+order: 1787249687503

@@ -1,0 +1,4 @@
+name: base_url
+values:
+  - key: base_url
+    value: ''
