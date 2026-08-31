@@ -1,6 +1,8 @@
 fastapi
 uvicorn
-psycopg[binary]
+psycopg[binary,pool]
+psycopg-pool
+cloudinary
 bcrypt
 PyJWT
 python-dotenv
