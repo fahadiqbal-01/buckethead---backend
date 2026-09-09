@@ -1,5 +1,4 @@
 from fastapi import FastAPI
-from app.routes.health import router as health_router
 from app.routes.auth import router as auth_router
 from app.routes.photoupload import router as photopostrouter
 from app.database.db import check_db_connection
@@ -13,7 +12,6 @@ async def startup_event():
     check_db_connection()
 
 
-app.include_router(health_router)
 app.include_router(auth_router)
 app.include_router(photopostrouter)
 app.add_middleware(
@@ -35,4 +33,4 @@ app.add_middleware(
 
 @app.get("/")
 def root():
-    return {"message": "API is running 🚀"}
+    return {"message": "API is running server is healthy 🚀"}
