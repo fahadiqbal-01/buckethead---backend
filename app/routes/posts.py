@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from app.handlers.posts import fetch_all_user_posts, remove_user_post
 from app.utils.jwt import get_current_user_id
+from app.utils.limiter import read_limiter, delete_limiter
 
 router = APIRouter()
 
 
-@router.get("/getallposts")
+@router.get("/getallposts", dependencies=[Depends(read_limiter)])
 async def get_all_posts_route(
     user_id: str = Depends(get_current_user_id),
 ):
@@ -21,7 +22,7 @@ async def get_all_posts_route(
     return result
 
 
-@router.delete("/deletepost/{post_type}/{post_id}")
+@router.delete("/deletepost/{post_type}/{post_id}", dependencies=[Depends(delete_limiter)])
 async def delete_post_route(
     post_type: str,
     post_id: str,

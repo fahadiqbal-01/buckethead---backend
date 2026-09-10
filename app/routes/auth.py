@@ -13,6 +13,7 @@ from app.utils.jwt import (
     get_user_id_for_refresh,
     create_access_token,
 )
+from app.utils.limiter import auth_limiter, read_limiter, modify_limiter
 from pydantic import BaseModel
 
 router = APIRouter()
@@ -42,12 +43,12 @@ class UserImageUpdate(BaseModel):
 
     
 
-@router.post("/registration")
+@router.post("/registration", dependencies=[Depends(auth_limiter)])
 def usersRegister(data: UserCreate):
     return registration(data.name, data.email, data.password)
 
 
-@router.post("/login")
+@router.post("/login", dependencies=[Depends(auth_limiter)])
 def usersLogin(data: UserValidate, response: Response):
     result = login(data.email, data.password)
     if "token" not in result:
@@ -72,8 +73,8 @@ def usersLogin(data: UserValidate, response: Response):
     }
 
 
-@router.post("/refresh-token")
-@router.post("/refresh")
+@router.post("/refresh-token", dependencies=[Depends(auth_limiter)])
+@router.post("/refresh", dependencies=[Depends(auth_limiter)])
 async def refresh_token_route(
     response: Response,
     user_id: str = Depends(get_user_id_for_refresh),
@@ -96,8 +97,8 @@ async def refresh_token_route(
     }
 
 
-@router.get("/getuser")
-@router.get("/me")
+@router.get("/getuser", dependencies=[Depends(read_limiter)])
+@router.get("/me", dependencies=[Depends(read_limiter)])
 async def get_me(user_id: str = Depends(get_current_user_id)):
     user = get_user_by_id(user_id)
     if not user or "error" in user:
@@ -108,8 +109,8 @@ async def get_me(user_id: str = Depends(get_current_user_id)):
     return user
 
 
-@router.put("/update-username")
-@router.patch("/update-username")
+@router.put("/update-username", dependencies=[Depends(modify_limiter)])
+@router.patch("/update-username", dependencies=[Depends(modify_limiter)])
 async def update_username_route(
     data: UsernameUpdate,
     user_id: str = Depends(get_current_user_id),
@@ -133,8 +134,8 @@ async def update_username_route(
     }
 
 
-@router.put("/update-profile-image")
-@router.patch("/update-profile-image")
+@router.put("/update-profile-image", dependencies=[Depends(modify_limiter)])
+@router.patch("/update-profile-image", dependencies=[Depends(modify_limiter)])
 async def update_profile_image_route(
     data: UserImageUpdate,
     user_id: str = Depends(get_current_user_id),

@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from typing import Optional
 from app.handlers.noteupload import note_upload, fetch_user_notes, change_note_color
 from app.utils.jwt import get_current_user_id
+from app.utils.limiter import create_limiter, read_limiter, modify_limiter
 
 router = APIRouter()
 
@@ -17,7 +18,7 @@ class UpdateNoteColorRequest(BaseModel):
     color: str
 
 
-@router.post("/noteupload", status_code=status.HTTP_201_CREATED)
+@router.post("/noteupload", status_code=status.HTTP_201_CREATED, dependencies=[Depends(create_limiter)])
 async def upload_note_route(
     data: UploadNoteRequest,
     user_id: str = Depends(get_current_user_id),
@@ -39,7 +40,7 @@ async def upload_note_route(
     return result
 
 
-@router.get("/getnoteuploads")
+@router.get("/getnoteuploads", dependencies=[Depends(read_limiter)])
 async def get_notes_route(
     user_id: str = Depends(get_current_user_id),
 ):
@@ -55,7 +56,7 @@ async def get_notes_route(
     return result
 
 
-@router.patch("/updatenotecolor/{note_id}")
+@router.patch("/updatenotecolor/{note_id}", dependencies=[Depends(modify_limiter)])
 async def update_note_color_route(
     note_id: str,
     data: UpdateNoteColorRequest,

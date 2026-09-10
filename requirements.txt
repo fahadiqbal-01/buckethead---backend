@@ -1,8 +1,10 @@
 fastapi
-uvicorn
+uvicorn[standard]
+pydantic
 psycopg[binary,pool]
-psycopg-pool
-cloudinary
 bcrypt
-PyJWT
+pyjwt
 python-dotenv
+python-multipart
+cloudinary
+fastapi-limiter

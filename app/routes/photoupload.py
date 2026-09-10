@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Request, HTTPException, status
+from fastapi import APIRouter, Depends, Request, HTTPException, status
 from pydantic import BaseModel
 from app.handlers.photoupload import photo_upload
 from app.utils.jwt import get_user_id_from_token
+from app.utils.limiter import create_limiter
 
 router = APIRouter()
 
@@ -12,7 +13,7 @@ class UploadPhotoRequest(BaseModel):
     note: str = ""
 
 
-@router.post("/photoupload", status_code=status.HTTP_201_CREATED)
+@router.post("/photoupload", status_code=status.HTTP_201_CREATED, dependencies=[Depends(create_limiter)])
 async def upload_photo_route(request: Request, data: UploadPhotoRequest):
     token = request.cookies.get("access_token")
     if not token:

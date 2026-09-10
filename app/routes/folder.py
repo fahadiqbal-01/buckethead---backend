@@ -1,4 +1,4 @@
-﻿from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from app.handlers.folder import (
     handle_create_space,
@@ -8,6 +8,12 @@ from app.handlers.folder import (
     handle_delete_space,
 )
 from app.utils.jwt import get_current_user_id
+from app.utils.limiter import (
+    create_limiter,
+    read_limiter,
+    modify_limiter,
+    delete_limiter,
+)
 
 router = APIRouter()
 
@@ -22,7 +28,7 @@ class SpaceItemRequest(BaseModel):
     post_id: str
 
 
-@router.post("/createspace", status_code=status.HTTP_201_CREATED)
+@router.post("/createspace", status_code=status.HTTP_201_CREATED, dependencies=[Depends(create_limiter)])
 async def create_space_route(
     data: CreateSpaceRequest,
     user_id: str = Depends(get_current_user_id),
@@ -48,7 +54,7 @@ async def create_space_route(
     return result
 
 
-@router.get("/getspaces")
+@router.get("/getspaces", dependencies=[Depends(read_limiter)])
 async def get_spaces_route(
     user_id: str = Depends(get_current_user_id),
 ):
@@ -64,7 +70,7 @@ async def get_spaces_route(
     return result
 
 
-@router.post("/addtospace")
+@router.post("/addtospace", dependencies=[Depends(modify_limiter)])
 async def add_item_to_space_route(
     data: SpaceItemRequest,
     user_id: str = Depends(get_current_user_id),
@@ -91,7 +97,7 @@ async def add_item_to_space_route(
     return result
 
 
-@router.post("/removefromspace")
+@router.post("/removefromspace", dependencies=[Depends(modify_limiter)])
 async def remove_item_from_space_route(
     data: SpaceItemRequest,
     user_id: str = Depends(get_current_user_id),
@@ -118,7 +124,7 @@ async def remove_item_from_space_route(
     return result
 
 
-@router.delete("/deletespace/{folder_name}")
+@router.delete("/deletespace/{folder_name}", dependencies=[Depends(delete_limiter)])
 async def delete_space_route(
     folder_name: str,
     user_id: str = Depends(get_current_user_id),
