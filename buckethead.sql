@@ -1,4 +1,4 @@
-﻿DROP TABLE IF EXISTS "public"."users";
+DROP TABLE IF EXISTS "public"."users";
 DROP TABLE IF EXISTS "public"."imgpost";
 DROP TABLE IF EXISTS "public"."linkpost";
 DROP TABLE IF EXISTS "public"."notespost";
@@ -9,6 +9,7 @@ CREATE TABLE "public"."users" (
     "name" varchar(20),
     "email" varchar(30) NOT NULL,
     "password_hash" text NOT NULL,
+    "image_url" text,
     "created_at" timestamp DEFAULT CURRENT_TIMESTAMP,
     "updated_at" timestamp DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY ("id")

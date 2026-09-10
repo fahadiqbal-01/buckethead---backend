@@ -49,12 +49,53 @@ def update_user(user_id, name,email,Password_hash):
                 return{"message":"user not found"}
             return{"id":str(user[0])}
         
-def remove_user(user_id):
-    with pool.connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute("""DELETE FROM users where id=%s RETURNING id""",
-                        (user_id,))
-            user=cur.fetchone()
-            if user[0] is None:
-                return None
-            return{"id":"user deleted", "id":str(user[0])}
+def get_user_by_id(user_id: str):
+    try:
+        with pool.connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT id, name, email, image_url FROM users WHERE id = %s", (user_id,))
+                row = cur.fetchone()
+                if row is None:
+                    return None
+                return {
+                    "id": str(row[0]),
+                    "name": row[1] or "",
+                    "email": row[2] or "",
+                    "image_url": row[3] or "",
+                }
+    except Exception as exc:
+        return {"error": "db query failed", "details": str(exc)}
+
+
+def update_username(user_id: str, new_name: str):
+    try:
+        with pool.connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "UPDATE users SET name = %s, updated_at = CURRENT_TIMESTAMP WHERE id = %s RETURNING id, name;",
+                    (new_name, user_id),
+                )
+                row = cur.fetchone()
+                if row is None:
+                    return None
+                return {"id": str(row[0]), "name": row[1]}
+    except Exception as exc:
+        return {"error": "db update failed", "details": str(exc)}
+
+
+def update_user_image(user_id: str, image_url: str):
+    try:
+        with pool.connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "UPDATE users SET image_url = %s, updated_at = CURRENT_TIMESTAMP WHERE id = %s RETURNING id, image_url;",
+                    (image_url, user_id),
+                )
+                row = cur.fetchone()
+                if row is None:
+                    return None
+                return {"id": str(row[0]), "image_url": row[1]}
+    except Exception as exc:
+        return {"error": "db update failed", "details": str(exc)}
+
+

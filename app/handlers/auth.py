@@ -34,3 +34,15 @@ def remove(user_id):
         return {"message":"user deleted"}
     else:
         return {"err":"user id incorretc"}
+
+
+def get_profile(user_id: str):
+    return user_reg.get_user_by_id(user_id)
+
+
+def update_profile_image(user_id: str, image_url: str):
+    return user_reg.update_user_image(user_id, image_url)
+
+
+def update_profile_name(user_id: str, name: str):
+    return user_reg.update_username(user_id, name)
