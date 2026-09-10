@@ -25,7 +25,7 @@ app.include_router(folder_router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://buckethead-eta.vercel.app",
+        "https://buckethead-seven.vercel.app",
         "http://127.0.0.1:3000",
         "http://127.0.0.1:3001",
         "http://127.0.0.1:3002",
