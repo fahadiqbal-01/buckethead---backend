@@ -13,6 +13,7 @@ from pyrate_limiter import (
     Duration,
 )
 from app.utils.jwt import decode_access_token
+from app.utils.ip_ban import get_client_ip, ip_ban_manager
 
 
 async def smart_identifier(request: Union[Request, WebSocket]) -> str:
@@ -43,22 +44,25 @@ async def smart_identifier(request: Union[Request, WebSocket]) -> str:
             pass
 
     # 2. Fall back to client IP for unauthenticated routes
-    forwarded = request.headers.get("x-forwarded-for") if hasattr(request, "headers") else None
-    if forwarded:
-        ip = forwarded.split(",")[0].strip()
-    elif hasattr(request, "client") and request.client:
-        ip = request.client.host
-    else:
-        ip = "127.0.0.1"
-
+    ip = get_client_ip(request)
     return f"ip:{ip}:{method}:{path}"
 
 
-async def rate_limit_callback(request: Request, response: Response = None):
+async def rate_limit_callback(request: Request, _response: Response = None):
     """
     Custom 429 response when rate limit is exceeded.
     Returns HTTP 429 Too Many Requests with Retry-After header.
+    Tracks rate limit violations per IP; if repeated, escalates to a temporary IP ban.
     """
+    ip = get_client_ip(request)
+    was_banned, reason = ip_ban_manager.record_rate_limit_violation(ip)
+    if was_banned:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"IP Banned: {reason}. Banned for {ip_ban_manager.ban_duration_seconds} seconds.",
+            headers={"Retry-After": str(ip_ban_manager.ban_duration_seconds)},
+        )
+
     raise HTTPException(
         status_code=status.HTTP_429_TOO_MANY_REQUESTS,
         detail="Too many requests. Please slow down and try again shortly.",
